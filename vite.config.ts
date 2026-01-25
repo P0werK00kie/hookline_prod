@@ -9,4 +9,25 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "query-vendor": ["@tanstack/react-query"],
+          "form-vendor": ["react-hook-form", "@hookform/resolvers", "zod"],
+          "ui-vendor": [
+            "@radix-ui/react-toast",
+            "@radix-ui/react-label",
+            "@radix-ui/react-slot",
+          ],
+          // Appwrite chunk
+          appwrite: ["appwrite"],
+        },
+      },
+    },
+    // Increase chunk size warning limit to 600kb
+    chunkSizeWarningLimit: 600,
+  },
 });
