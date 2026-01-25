@@ -26,7 +26,8 @@ const SigninForm = () => {
   const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
 
   // Query
-  const { mutateAsync: signInAccount } = useSignInAccount();
+  const { mutateAsync: signInAccount, isPending: isSigningIn } =
+    useSignInAccount();
 
   const form = useForm<z.infer<typeof SigninValidation>>({
     resolver: zodResolver(SigninValidation),
@@ -37,24 +38,41 @@ const SigninForm = () => {
   });
 
   const handleSignin = async (user: z.infer<typeof SigninValidation>) => {
-    const session = await signInAccount(user);
+    try {
+      const session = await signInAccount(user);
 
-    if (!session) {
-      toast({ title: "Login failed. Please try again." });
+      if (!session) {
+        toast({
+          title: "Login failed",
+          description: "Invalid email or password. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      return;
-    }
+      const isLoggedIn = await checkAuthUser();
 
-    const isLoggedIn = await checkAuthUser();
-
-    if (isLoggedIn) {
-      form.reset();
-
-      navigate("/");
-    } else {
-      toast({ title: "Login failed. Please try again." });
-
-      return;
+      if (isLoggedIn) {
+        form.reset();
+        toast({
+          title: "Success!",
+          description: "You have successfully logged in.",
+        });
+        navigate("/");
+      } else {
+        toast({
+          title: "Login failed",
+          description: "Unable to authenticate. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Error",
+        description: "An error occurred during login. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -101,8 +119,12 @@ const SigninForm = () => {
             )}
           />
 
-          <Button type="submit" className="shad-button_primary">
-            {isUserLoading ? (
+          <Button
+            type="submit"
+            className="shad-button_primary"
+            disabled={isSigningIn || isUserLoading}
+          >
+            {isSigningIn || isUserLoading ? (
               <div className="flex-center gap-2">
                 <Loader /> Loading...
               </div>

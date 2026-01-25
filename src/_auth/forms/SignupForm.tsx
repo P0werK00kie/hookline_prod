@@ -50,8 +50,12 @@ const SignupForm = () => {
       const newUser = await createUserAccount(user);
 
       if (!newUser) {
-        toast({ title: "Sign up failed. Please try again." });
-
+        toast({
+          title: "Sign up failed",
+          description:
+            "Unable to create account. The email may already be in use.",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -61,10 +65,11 @@ const SignupForm = () => {
       });
 
       if (!session) {
-        toast({ title: "Something went wrong. Please login your new account" });
-
+        toast({
+          title: "Account created!",
+          description: "Please login with your new account.",
+        });
         navigate("/sign-in");
-
         return;
       }
 
@@ -72,15 +77,27 @@ const SignupForm = () => {
 
       if (isLoggedIn) {
         form.reset();
-
+        toast({
+          title: "Welcome!",
+          description: "Your account has been created successfully.",
+        });
         navigate("/");
       } else {
-        toast({ title: "Login failed. Please try again." });
-
-        return;
+        toast({
+          title: "Login failed",
+          description:
+            "Account created but unable to login. Please try signing in.",
+          variant: "destructive",
+        });
+        navigate("/sign-in");
       }
     } catch (error) {
       console.log({ error });
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -156,7 +173,11 @@ const SignupForm = () => {
             )}
           />
 
-          <Button type="submit" className="shad-button_primary">
+          <Button
+            type="submit"
+            className="shad-button_primary"
+            disabled={isCreatingAccount || isSigningInUser || isUserLoading}
+          >
             {isCreatingAccount || isSigningInUser || isUserLoading ? (
               <div className="flex-center gap-2">
                 <Loader /> Loading...

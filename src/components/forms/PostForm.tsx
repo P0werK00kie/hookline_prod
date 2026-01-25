@@ -48,35 +48,60 @@ const PostForm = ({ post, action }: PostFormProps) => {
 
   // Handler
   const handleSubmit = async (value: z.infer<typeof PostValidation>) => {
-    // ACTION = UPDATE
-    if (post && action === "Update") {
-      const updatedPost = await updatePost({
-        ...value,
-        postId: post.$id,
-        imageId: post.imageId,
-        imageUrl: post.imageUrl,
-      });
-
-      if (!updatedPost) {
-        toast({
-          title: `${action} post failed. Please try again.`,
+    try {
+      // ACTION = UPDATE
+      if (post && action === "Update") {
+        const updatedPost = await updatePost({
+          ...value,
+          postId: post.$id,
+          imageId: post.imageId,
+          imageUrl: post.imageUrl,
         });
+
+        if (!updatedPost) {
+          toast({
+            title: "Update failed",
+            description: "Unable to update post. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        toast({
+          title: "Success!",
+          description: "Post updated successfully.",
+        });
+        return navigate(`/posts/${post.$id}`);
       }
-      return navigate(`/posts/${post.$id}`);
-    }
 
-    // ACTION = CREATE
-    const newPost = await createPost({
-      ...value,
-      userId: user.id,
-    });
+      // ACTION = CREATE
+      const newPost = await createPost({
+        ...value,
+        userId: user.id,
+      });
 
-    if (!newPost) {
+      if (!newPost) {
+        toast({
+          title: "Create failed",
+          description: "Unable to create post. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({
-        title: `${action} post failed. Please try again.`,
+        title: "Success!",
+        description: "Post created successfully.",
+      });
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Error",
+        description: `An error occurred while ${action === "Update" ? "updating" : "creating"} the post.`,
+        variant: "destructive",
       });
     }
-    navigate("/");
   };
 
   return (
