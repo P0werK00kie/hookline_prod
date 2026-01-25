@@ -1,5 +1,12 @@
 # Snapgram - Social Media Application
 
+[![React](https://img.shields.io/badge/React-19.2.3-blue?logo=react)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-7.3.1-purple?logo=vite)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.19-blue?logo=tailwind-css)](https://tailwindcss.com/)
+[![Appwrite](https://img.shields.io/badge/Appwrite-13.0.2-red?logo=appwrite)](https://appwrite.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A modern, full-featured social media application built with React, TypeScript, and Appwrite. Snapgram allows users to share posts, interact with content, explore feeds, and connect with other users in a responsive and intuitive interface.
 
 ## 🚀 Features
