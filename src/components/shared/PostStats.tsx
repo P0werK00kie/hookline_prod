@@ -17,9 +17,11 @@ type PostStatsProps = {
 
 const PostStats = ({ post, userId }: PostStatsProps) => {
   const location = useLocation();
-  const likesList = post.likes?.map((user: Models.Document) => user.$id) || [];
+  const likesList = post.likes || [];
 
-  const [likes, setLikes] = useState<string[]>(likesList);
+  const [likes, setLikes] = useState<string[]>(
+    likesList.map((user: Models.Document) => user.$id),
+  );
   const [isSaved, setIsSaved] = useState(false);
 
   const { mutate: likePost } = useLikePost();
@@ -29,7 +31,7 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
   const { data: currentUser } = useGetCurrentUser();
 
   const savedPostRecord = currentUser?.save.find(
-    (record: Models.Document) => record.post.$id === post.$id,
+    (record: Models.Document) => (record as any).post.$id === post.$id,
   );
 
   useEffect(() => {
