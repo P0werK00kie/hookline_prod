@@ -59,7 +59,7 @@ export const useGetPosts = () => {
   return useInfiniteQuery({
     queryKey: [QUERY_KEYS.GET_INFINITE_POSTS],
     queryFn: getInfinitePosts,
-    initialPageParam: 1,
+    initialPageParam: null,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getNextPageParam: (lastPage: any) => {
       // If there's no data, there are no more pages.
