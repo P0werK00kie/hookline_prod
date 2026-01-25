@@ -1,0 +1,8 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+Disallow: /sign-in
+Disallow: /sign-up
+
+# Sitemap
+Sitemap: https://snapgram.app/sitemap.xml

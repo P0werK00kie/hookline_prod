@@ -284,6 +284,42 @@ Zod schemas validate all forms before submission, ensuring data integrity.
 
 Mobile-first approach with breakpoints for tablet and desktop views.
 
+## 🎨 SEO & Branding
+
+### Favicon
+
+The project includes a custom SVG favicon located at `public/favicon.svg`. To generate PNG versions for better browser compatibility:
+
+```bash
+# Run the favicon generation script
+chmod +x scripts/generate-favicons.sh
+./scripts/generate-favicons.sh
+```
+
+Or use an online tool like [RealFaviconGenerator](https://realfavicongenerator.net/)
+
+### SEO Optimization
+
+The application is optimized for search engines with:
+
+- **Meta Tags**: Comprehensive meta tags for search engines
+- **Open Graph**: Social media sharing optimization (Facebook, LinkedIn)
+- **Twitter Cards**: Twitter-specific meta tags
+- **Structured Data**: JSON-LD schema for better search results
+- **Sitemap**: XML sitemap at `/sitemap.xml`
+- **Robots.txt**: Search engine crawling instructions
+- **Semantic HTML**: Proper heading hierarchy and ARIA labels
+- **Mobile-Friendly**: Responsive design with viewport meta tag
+- **Performance**: Optimized images and lazy loading
+
+### PWA Support
+
+Progressive Web App manifest included at `public/site.webmanifest`:
+
+- Installable on mobile devices
+- Custom theme colors
+- App icons for various platforms
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
