@@ -3,15 +3,18 @@
 ## Repository About Section
 
 **Description:**
+
 ```
 A modern, full-stack social media application built with React, TypeScript, Tailwind CSS, and Appwrite. Features include user authentication, post creation with image uploads, social interactions (likes & saves), infinite scroll, and a responsive UI with dark mode.
 ```
 
 **Website URL:**
+
 ```
 https://snapgram.app
 ```
-*(Update with your actual deployment URL)*
+
+_(Update with your actual deployment URL)_
 
 ## Repository Topics/Tags
 
@@ -43,6 +46,7 @@ progressive-web-app
 ## How to Update on GitHub
 
 ### 1. Update About Section
+
 1. Go to your repository: `https://github.com/mnfhobbyprojects/react-social-media-app`
 2. Click the ⚙️ (Settings) icon next to "About" on the right sidebar
 3. Paste the description above in the "Description" field
@@ -51,6 +55,7 @@ progressive-web-app
 6. Click "Save changes"
 
 ### 2. Add Topics/Tags
+
 1. In the same "About" settings dialog
 2. Click in the "Topics" field
 3. Add topics one by one from the list above
@@ -60,7 +65,9 @@ progressive-web-app
 ## Additional Repository Settings
 
 ### Social Preview Image
+
 Create a social preview image (1200x630px) with:
+
 - Snapgram logo
 - App screenshot
 - Tagline: "Share Your Moments"
@@ -83,23 +90,28 @@ Add these badges to your README.md:
 ### Repository Settings Recommendations
 
 **Features to Enable:**
+
 - ✅ Issues
 - ✅ Discussions (for community engagement)
 - ✅ Preserve this repository (important projects)
 
 **Branch Protection:**
+
 - Require pull request reviews before merging
 - Require status checks to pass
 - Include administrators
 
 **GitHub Pages** (if deploying):
+
 - Source: gh-pages branch or docs folder
 - Custom domain: snapgram.app
 
 ## SEO & Discovery
 
 ### GitHub Search Keywords
+
 The repository will be discoverable for:
+
 - "React social media app"
 - "Instagram clone React TypeScript"
 - "Appwrite social network"
@@ -107,7 +119,9 @@ The repository will be discoverable for:
 - "Social media platform starter"
 
 ### Star & Watch
+
 Encourage users to:
+
 - ⭐ Star the repository
 - 👁️ Watch for updates
 - 🍴 Fork for their own projects
@@ -119,6 +133,7 @@ The project uses MIT License. Make sure the LICENSE file is present in the root 
 ## Contributing
 
 Consider adding:
+
 - CONTRIBUTING.md - Guidelines for contributors
 - CODE_OF_CONDUCT.md - Community standards
 - SECURITY.md - Security policy and reporting
