@@ -9,7 +9,29 @@
 
 A modern, full-featured social media application built with React, TypeScript, and Appwrite. Snapgram allows users to share posts, interact with content, explore feeds, and connect with other users in a responsive and intuitive interface.
 
-## 🚀 Features
+## � Screenshots
+
+### Login Page
+
+![Login Page](screenshots/01-login-page.png)
+
+### Home Feed
+
+![Home Feed](screenshots/02-home-feed.png)
+
+### Explore Page
+
+![Explore Page](screenshots/03-explore-page.png)
+
+### All Users
+
+![All Users](screenshots/04-all-users.png)
+
+### Create Post
+
+![Create Post](screenshots/05-create-post.png)
+
+## �🚀 Features
 
 - **User Authentication**
   - Sign up and sign in functionality
