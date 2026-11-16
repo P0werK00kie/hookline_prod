@@ -245,6 +245,12 @@ src/
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
+- `npm run migrate` - Copy an Appwrite Cloud project into a self-hosted Appwrite (see [PORTAINER.md](PORTAINER.md))
+
+## 🐳 Self-hosting (Portainer)
+
+The repo includes a Docker Compose stack that runs the app and a self-hosted
+Appwrite 1.4 (with its own MariaDB) on one host. See [PORTAINER.md](PORTAINER.md).
 
 ## 🗄️ Database Schema
 

@@ -1,6 +1,7 @@
 import { ID, Query } from "appwrite";
 
 import { appwriteConfig, account, databases, storage, avatars } from "./config";
+import { clearApiSession } from "@/lib/hookline/api";
 import { IUpdatePost, INewPost, INewUser, IUpdateUser } from "@/types";
 
 // ============================================================
@@ -93,9 +94,12 @@ export async function getCurrentUser() {
       [Query.equal("accountId", currentAccount.$id)],
     );
 
-    if (!currentUser) throw Error;
+    if (!currentUser?.documents[0]) throw Error;
 
-    return currentUser.documents[0];
+    // Attach the account's role labels to the user document.
+    return Object.assign(currentUser.documents[0], {
+      labels: currentAccount.labels,
+    });
   } catch (error) {
     console.log(error);
     return null;
@@ -105,6 +109,7 @@ export async function getCurrentUser() {
 // ============================== SIGN OUT
 export async function signOutAccount() {
   try {
+    clearApiSession();
     const session = await account.deleteSession("current");
 
     return session;

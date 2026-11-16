@@ -22,6 +22,12 @@ import {
 } from "@/lib/react-query/queries";
 import { SignupValidation } from "@/lib/validation";
 import { useUserContext } from "@/context/AuthContext";
+import { hooklineApi } from "@/lib/hookline/api";
+
+const ROLE_CHOICES = [
+  { value: "writer", label: "I'm a Writer", hint: "Post songs, find co-writers, follow the guides" },
+  { value: "singer", label: "I'm a Singer", hint: "Discover songs and connect with writers" },
+] as const;
 
 const SignupForm = () => {
   const { toast } = useToast();
@@ -35,6 +41,7 @@ const SignupForm = () => {
       username: "",
       email: "",
       password: "",
+      role: undefined,
     },
   });
 
@@ -45,7 +52,7 @@ const SignupForm = () => {
     useSignInAccount();
 
   // Handler
-  const handleSignup = async (user: z.infer<typeof SignupValidation>) => {
+  const handleSignup = async ({ role, ...user }: z.infer<typeof SignupValidation>) => {
     try {
       const newUser = await createUserAccount(user);
 
@@ -73,7 +80,24 @@ const SignupForm = () => {
         return;
       }
 
+      // Apply the Writer/Singer choice (role labels are set server-side).
+      let roleSet = true;
+      try {
+        await hooklineApi.chooseRole(role);
+      } catch (e) {
+        roleSet = false;
+        console.error("chooseRole failed", e);
+      }
+
       const isLoggedIn = await checkAuthUser();
+
+      if (isLoggedIn && !roleSet) {
+        toast({
+          title: "Account created",
+          description:
+            "We couldn't set your Writer/Singer role. You can choose it later from Writers Block.",
+        });
+      }
 
       if (isLoggedIn) {
         form.reset();
@@ -110,13 +134,50 @@ const SignupForm = () => {
           Create a new account
         </h2>
         <p className="text-light-3 small-medium md:base-regular mt-2">
-          To use snapgram, Please enter your details
+          Join Hook Line and Music. Enter your details to get started.
         </p>
 
         <form
           onSubmit={form.handleSubmit(handleSignup)}
           className="flex flex-col gap-5 w-full mt-4"
         >
+          <FormField
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="shad-form_label">I'm joining as</FormLabel>
+                <FormControl>
+                  <div role="radiogroup" className="grid grid-cols-2 gap-3">
+                    {ROLE_CHOICES.map((c) => {
+                      const on = field.value === c.value;
+                      return (
+                        <button
+                          key={c.value}
+                          type="button"
+                          role="radio"
+                          aria-checked={on}
+                          onClick={() => field.onChange(c.value)}
+                          className={`rounded-xl border p-4 text-left transition ${
+                            on
+                              ? "border-primary-500 bg-primary-500/15"
+                              : "border-dark-4 bg-dark-3 hover:border-primary-500"
+                          }`}
+                        >
+                          <span className="block base-semibold">{c.label}</span>
+                          <span className="block subtle-semibold text-light-3 mt-1">
+                            {c.hint}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="name"

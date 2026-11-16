@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.env*
+!.env.example
+*.local
+screenshots
+docker-compose*.yml
+stack.env*
