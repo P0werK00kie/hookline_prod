@@ -1,0 +1,17 @@
+{
+  "name": "hookline-api",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Server-side helpers for Hook Line and Music: role labels, writer connections, schema provisioning.",
+  "main": "src/server.mjs",
+  "scripts": {
+    "start": "node src/server.mjs"
+  },
+  "dependencies": {
+    "node-appwrite": "11.1.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

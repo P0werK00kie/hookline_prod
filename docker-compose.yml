@@ -116,6 +116,29 @@ services:
       VITE_APPWRITE_SAVES_COLLECTION_ID: ${APPWRITE_SAVES_COLLECTION_ID:?Set APPWRITE_SAVES_COLLECTION_ID}
     depends_on:
       - appwrite-gateway
+      - hookline-api
+    networks: [appwrite]
+
+  # ------------------------------------------------------------ app API
+  # Roles (Appwrite labels), writer connections, and schema/seed for the
+  # For Writers features. Reached by the browser at /api via the web container.
+  hookline-api:
+    build:
+      context: ./api
+    image: hookline-api:latest
+    <<: *x-logging
+    restart: unless-stopped
+    environment:
+      APPWRITE_ENDPOINT: http://appwrite/v1
+      APPWRITE_PROJECT_ID: ${APPWRITE_PROJECT_ID}
+      APPWRITE_DATABASE_ID: ${APPWRITE_DATABASE_ID}
+      # Server API key from the Appwrite console (see PORTAINER.md). Until it's
+      # set the API reports "not ready" and the For Writers pages are disabled.
+      APPWRITE_API_KEY: ${HOOKLINE_API_KEY:-}
+      # Comma-separated emails that are made Admin when they sign in.
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+    depends_on:
+      - appwrite
     networks: [appwrite]
 
   # ------------------------------------------------------------ appwrite edge

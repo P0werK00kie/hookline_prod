@@ -12,6 +12,9 @@ export const SignupValidation = z.object({
   password: z
     .string()
     .min(8, { message: "Password must be at least 8 characters." }),
+  role: z.enum(["writer", "singer"], {
+    message: "Choose whether you're a Writer or a Singer.",
+  }),
 });
 
 export const SigninValidation = z.object({

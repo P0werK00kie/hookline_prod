@@ -1,11 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { IUser } from "@/types";
+import { IRole, IUser } from "@/types";
+import { ROLES } from "@/lib/roles";
 import { getCurrentUser } from "@/lib/appwrite/api";
 
-export const INITIAL_USER = {
+export const INITIAL_USER: IUser = {
   id: "",
+  accountId: "",
+  roles: [],
   name: "",
   username: "",
   email: "",
@@ -17,6 +20,7 @@ const INITIAL_STATE = {
   user: INITIAL_USER,
   isLoading: false,
   isAuthenticated: false,
+  hasCheckedAuth: false,
   setUser: () => {},
   setIsAuthenticated: () => {},
   checkAuthUser: async () => false as boolean,
@@ -27,6 +31,8 @@ type IContextType = {
   isLoading: boolean;
   setUser: React.Dispatch<React.SetStateAction<IUser>>;
   isAuthenticated: boolean;
+  /** True once the first session check has finished (success or not). */
+  hasCheckedAuth: boolean;
   setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
   checkAuthUser: () => Promise<boolean>;
 };
@@ -38,6 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<IUser>(INITIAL_USER);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
 
   const checkAuthUser = async () => {
     setIsLoading(true);
@@ -46,6 +53,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (currentAccount) {
         setUser({
           id: currentAccount.$id,
+          accountId: currentAccount.accountId,
+          roles: (currentAccount.labels || []).filter((l: string): l is IRole =>
+            (ROLES as readonly string[]).includes(l),
+          ),
           name: currentAccount.name,
           username: currentAccount.username,
           email: currentAccount.email,
@@ -63,6 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return false;
     } finally {
       setIsLoading(false);
+      setHasCheckedAuth(true);
     }
   };
 
@@ -84,6 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser,
     isLoading,
     isAuthenticated,
+    hasCheckedAuth,
     setIsAuthenticated,
     checkAuthUser,
   };

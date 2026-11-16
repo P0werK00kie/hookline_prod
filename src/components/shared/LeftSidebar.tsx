@@ -1,7 +1,8 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 
 import { INavLink } from "@/types";
-import { sidebarLinks } from "@/constants";
+import { adminLinks, sidebarLinks, writerLinks } from "@/constants";
+import { hasRole } from "@/lib/roles";
 import { Loader } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { useSignOutAccount } from "@/lib/react-query/queries";
@@ -26,7 +27,7 @@ const LeftSidebar = () => {
 
   return (
     <nav className="leftsidebar">
-      <div className="flex flex-col gap-11">
+      <div className="flex flex-col gap-8">
         <Link to="/" className="flex gap-3 items-center">
           <img
             src="/assets/images/logo.svg"
@@ -54,34 +55,25 @@ const LeftSidebar = () => {
           </Link>
         )}
 
-        <ul className="flex flex-col gap-6">
-          {sidebarLinks.map((link: INavLink) => {
-            const isActive = pathname === link.route;
-
-            return (
-              <li
-                key={link.label}
-                className={`leftsidebar-link group ${
-                  isActive && "bg-primary-500"
-                }`}
-              >
-                <NavLink
-                  to={link.route}
-                  className="flex gap-4 items-center p-4"
-                >
-                  <img
-                    src={link.imgURL}
-                    alt={link.label}
-                    className={`group-hover:invert-white ${
-                      isActive && "invert-white"
-                    }`}
-                  />
-                  {link.label}
-                </NavLink>
-              </li>
-            );
-          })}
+        <ul className="flex flex-col gap-2">
+          {sidebarLinks.map((link: INavLink) => (
+            <SidebarLink key={link.label} link={link} active={pathname === link.route} />
+          ))}
         </ul>
+
+        <NavGroup title="For Writers">
+          {writerLinks.map((link) => (
+            <SidebarLink key={link.label} link={link} active={pathname.startsWith(link.route)} />
+          ))}
+        </NavGroup>
+
+        {hasRole(user, "admin") && (
+          <NavGroup title="Admin">
+            {adminLinks.map((link) => (
+              <SidebarLink key={link.label} link={link} active={pathname.startsWith(link.route)} />
+            ))}
+          </NavGroup>
+        )}
       </div>
 
       <Button
@@ -95,5 +87,25 @@ const LeftSidebar = () => {
     </nav>
   );
 };
+
+const NavGroup = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <div className="flex flex-col gap-2">
+    <p className="px-4 subtle-semibold uppercase tracking-[0.15em] text-light-4">{title}</p>
+    <ul className="flex flex-col gap-2">{children}</ul>
+  </div>
+);
+
+const SidebarLink = ({ link, active }: { link: INavLink; active: boolean }) => (
+  <li className={`leftsidebar-link group ${active && "bg-primary-500"}`}>
+    <NavLink to={link.route} className="flex gap-4 items-center p-4">
+      <img
+        src={link.imgURL}
+        alt=""
+        className={`group-hover:invert-white ${active && "invert-white"}`}
+      />
+      {link.label}
+    </NavLink>
+  </li>
+);
 
 export default LeftSidebar;

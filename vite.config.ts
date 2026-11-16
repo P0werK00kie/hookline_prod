@@ -9,6 +9,12 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    // In dev, /api goes to hookline-api through a running stack's web container.
+    proxy: {
+      "/api": process.env.HOOKLINE_API_PROXY || "http://localhost:7070",
+    },
+  },
   build: {
     rollupOptions: {
       output: {

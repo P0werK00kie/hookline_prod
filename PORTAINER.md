@@ -6,6 +6,7 @@ The stack in [`docker-compose.yml`](docker-compose.yml) runs the whole app on on
 | ------ | ------------------ | --------------------------------------------------------------- |
 | `7070` | `web`              | The React app (nginx)                                           |
 | `7071` | `appwrite-gateway` | Appwrite API (`/v1`), realtime (`/v1/realtime`) and the console |
+| —      | `hookline-api`     | Roles, Writers Block connections, schema setup (reached at `7070/api`) |
 
 Behind the gateway sit Appwrite **1.4.13** and its workers, plus MariaDB, Redis,
 InfluxDB and Telegraf. Appwrite is pinned to 1.4.x because the app uses the
@@ -56,6 +57,12 @@ echo "APPWRITE_OPENSSL_KEY=$(openssl rand -hex 32)"; echo "APPWRITE_DB_PASS=$(op
    Without this, the browser gets CORS errors.
 4. **Overview → API keys → Create API key** with these scopes: `users`, `databases`,
    `collections`, `attributes`, `indexes`, `documents`, `buckets`, `files` (read and write for each).
+   The migration (step 4) uses this key.
+5. Create a **second API key** named `hookline-api` with read and write for `users`,
+   `databases`, `collections`, `attributes`, `indexes` and `documents`. In Portainer, set
+   it as `HOOKLINE_API_KEY`, set `ADMIN_EMAILS` to your own email, and **update the
+   stack**. On start, `hookline-api` creates the For Writers collections and seeds the
+   guide. Check `http://APP_HOST:7070/api/health`; it reports `"ok":true` when it's ready.
 
 ## 4. Copy the data from Appwrite Cloud
 
@@ -107,6 +114,22 @@ When it's done, delete `.env.migrate`, since it holds API keys.
 Open `http://APP_HOST:7070` and sign in with an existing account.
 
 ---
+
+## Roles
+
+Roles are Appwrite **user labels**: `admin`, `writer` and `singer`. Appwrite enforces them
+through collection permissions, so hiding a page isn't the only protection.
+
+- New users choose **I'm a Writer** or **I'm a Singer** when they sign up. A signed-in
+  user can also become a Writer from the Writers Block "Writers only" page.
+- Anyone listed in `ADMIN_EMAILS` becomes an Admin the next time they sign in.
+- Admins manage everyone's roles at **Admin → Users & roles** (`/admin/users`), and can
+  edit Guild Me Through It chapters and every listing and resource in place.
+- Users can't give themselves `admin`; only the API (with its server key) sets labels.
+
+Sign-up writes the user's profile document before the user is signed in, so the
+`users` collection must give **Create** to **Any**. Projects migrated from Cloud already
+do, because that's how sign-up works there.
 
 ## Operations
 
