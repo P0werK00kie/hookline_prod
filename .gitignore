@@ -25,3 +25,6 @@ dist-ssr
 
 # Playwright test results
 .playwright-mcp/
+# Filled-in Portainer stack env / migration env
+stack.env
+.env.migrate

@@ -1,0 +1,298 @@
+# Hookline / Snapgram — Portainer stack
+#
+#   web                 React front end (nginx)            -> :${WEB_PORT:-7070}
+#   appwrite-gateway    nginx in front of Appwrite API/RT   -> :${APPWRITE_PORT:-7071}
+#   appwrite + workers  self-hosted Appwrite 1.4.13 (matches appwrite JS SDK v13)
+#   mariadb / redis / influxdb / telegraf  Appwrite's backing services
+#
+# Based on Appwrite's official 1.4.13 compose with Traefik, Functions
+# (executor/builds/functions workers) and the AI assistant removed.
+# Required variables are listed in stack.env.example; see PORTAINER.md.
+
+x-logging: &x-logging
+  logging:
+    driver: json-file
+    options:
+      max-file: "5"
+      max-size: "10m"
+
+x-appwrite-env: &appwrite-env
+  _APP_ENV: production
+  _APP_LOCALE: en
+  _APP_WORKER_PER_CORE: ${APPWRITE_WORKER_PER_CORE:-6}
+  _APP_CONSOLE_WHITELIST_ROOT: ${APPWRITE_CONSOLE_WHITELIST_ROOT:-enabled}
+  _APP_CONSOLE_WHITELIST_EMAILS: ${APPWRITE_CONSOLE_WHITELIST_EMAILS:-}
+  _APP_CONSOLE_WHITELIST_IPS: ""
+  _APP_SYSTEM_EMAIL_NAME: ${APPWRITE_SYSTEM_EMAIL_NAME:-Hookline}
+  _APP_SYSTEM_EMAIL_ADDRESS: ${APPWRITE_SYSTEM_EMAIL_ADDRESS:-noreply@hookline.local}
+  _APP_SYSTEM_SECURITY_EMAIL_ADDRESS: ${APPWRITE_SYSTEM_EMAIL_ADDRESS:-noreply@hookline.local}
+  _APP_SYSTEM_RESPONSE_FORMAT: ""
+  _APP_OPTIONS_ABUSE: enabled
+  _APP_OPTIONS_ROUTER_PROTECTION: disabled
+  _APP_OPTIONS_FORCE_HTTPS: disabled
+  _APP_OPTIONS_FUNCTIONS_FORCE_HTTPS: disabled
+  _APP_OPENSSL_KEY_V1: ${APPWRITE_OPENSSL_KEY:?Set APPWRITE_OPENSSL_KEY (random 32+ chars, never change it after first start)}
+  _APP_DOMAIN: ${APP_HOST:?Set APP_HOST to the Portainer host LAN IP or hostname}
+  _APP_DOMAIN_TARGET: ${APP_HOST}
+  _APP_DOMAIN_FUNCTIONS: functions.${APP_HOST}
+  _APP_REDIS_HOST: redis
+  _APP_REDIS_PORT: "6379"
+  _APP_REDIS_USER: ""
+  _APP_REDIS_PASS: ""
+  _APP_DB_HOST: mariadb
+  _APP_DB_PORT: "3306"
+  _APP_DB_SCHEMA: appwrite
+  _APP_DB_USER: appwrite
+  _APP_DB_PASS: ${APPWRITE_DB_PASS:?Set APPWRITE_DB_PASS}
+  _APP_SMTP_HOST: ${APPWRITE_SMTP_HOST:-}
+  _APP_SMTP_PORT: ${APPWRITE_SMTP_PORT:-}
+  _APP_SMTP_SECURE: ${APPWRITE_SMTP_SECURE:-}
+  _APP_SMTP_USERNAME: ${APPWRITE_SMTP_USERNAME:-}
+  _APP_SMTP_PASSWORD: ${APPWRITE_SMTP_PASSWORD:-}
+  _APP_SMS_PROVIDER: ""
+  _APP_SMS_FROM: ""
+  _APP_USAGE_STATS: enabled
+  _APP_USAGE_AGGREGATION_INTERVAL: "30"
+  _APP_INFLUXDB_HOST: influxdb
+  _APP_INFLUXDB_PORT: "8086"
+  _APP_STATSD_HOST: telegraf
+  _APP_STATSD_PORT: "8125"
+  _APP_STORAGE_LIMIT: ${APPWRITE_STORAGE_LIMIT:-30000000}
+  _APP_STORAGE_PREVIEW_LIMIT: "20000000"
+  _APP_STORAGE_ANTIVIRUS: disabled
+  _APP_STORAGE_ANTIVIRUS_HOST: clamav
+  _APP_STORAGE_ANTIVIRUS_PORT: "3310"
+  _APP_STORAGE_DEVICE: local
+  _APP_FUNCTIONS_SIZE_LIMIT: "30000000"
+  _APP_FUNCTIONS_TIMEOUT: "900"
+  _APP_FUNCTIONS_BUILD_TIMEOUT: "900"
+  _APP_FUNCTIONS_CPUS: "0"
+  _APP_FUNCTIONS_MEMORY: "0"
+  _APP_FUNCTIONS_RUNTIMES: ""
+  _APP_EXECUTOR_SECRET: ${APPWRITE_OPENSSL_KEY}
+  _APP_EXECUTOR_HOST: http://appwrite-executor/v1
+  _APP_LOGGING_PROVIDER: ""
+  _APP_LOGGING_CONFIG: ""
+  _APP_MAINTENANCE_INTERVAL: "86400"
+  _APP_MAINTENANCE_RETENTION_EXECUTION: "1209600"
+  _APP_MAINTENANCE_RETENTION_CACHE: "2592000"
+  _APP_MAINTENANCE_RETENTION_ABUSE: "86400"
+  _APP_MAINTENANCE_RETENTION_AUDIT: "1209600"
+  _APP_MAINTENANCE_RETENTION_USAGE_HOURLY: "8640000"
+  _APP_MAINTENANCE_RETENTION_SCHEDULES: "86400"
+  _APP_GRAPHQL_MAX_BATCH_SIZE: "10"
+  _APP_GRAPHQL_MAX_COMPLEXITY: "250"
+  _APP_GRAPHQL_MAX_DEPTH: "3"
+  _APP_VCS_GITHUB_PRIVATE_KEY: disabled
+  _APP_MIGRATIONS_FIREBASE_CLIENT_ID: ""
+  _APP_MIGRATIONS_FIREBASE_CLIENT_SECRET: ""
+  _APP_ASSISTANT_OPENAI_API_KEY: ""
+
+x-appwrite-service: &appwrite-service
+  image: appwrite/appwrite:1.4.13
+  <<: *x-logging
+  restart: unless-stopped
+  networks: [appwrite]
+  environment: *appwrite-env
+
+services:
+  # ------------------------------------------------------------ front end
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hookline-web:latest
+    <<: *x-logging
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-7070}:80"
+    environment:
+      VITE_APPWRITE_URL: http://${APP_HOST}:${APPWRITE_PORT:-7071}/v1
+      VITE_APPWRITE_PROJECT_ID: ${APPWRITE_PROJECT_ID:?Set APPWRITE_PROJECT_ID}
+      VITE_APPWRITE_DATABASE_ID: ${APPWRITE_DATABASE_ID:?Set APPWRITE_DATABASE_ID}
+      VITE_APPWRITE_STORAGE_ID: ${APPWRITE_STORAGE_ID:?Set APPWRITE_STORAGE_ID}
+      VITE_APPWRITE_USER_COLLECTION_ID: ${APPWRITE_USER_COLLECTION_ID:?Set APPWRITE_USER_COLLECTION_ID}
+      VITE_APPWRITE_POST_COLLECTION_ID: ${APPWRITE_POST_COLLECTION_ID:?Set APPWRITE_POST_COLLECTION_ID}
+      VITE_APPWRITE_SAVES_COLLECTION_ID: ${APPWRITE_SAVES_COLLECTION_ID:?Set APPWRITE_SAVES_COLLECTION_ID}
+    depends_on:
+      - appwrite-gateway
+    networks: [appwrite]
+
+  # ------------------------------------------------------------ appwrite edge
+  appwrite-gateway:
+    build:
+      context: ./docker/gateway
+    image: hookline-appwrite-gateway:latest
+    <<: *x-logging
+    restart: unless-stopped
+    ports:
+      - "${APPWRITE_PORT:-7071}:80"
+    depends_on:
+      - appwrite
+      - appwrite-realtime
+    networks: [appwrite]
+
+  # ------------------------------------------------------------ appwrite core
+  appwrite:
+    <<: *appwrite-service
+    volumes:
+      - appwrite-uploads:/storage/uploads:rw
+      - appwrite-cache:/storage/cache:rw
+      - appwrite-config:/storage/config:rw
+      - appwrite-certificates:/storage/certificates:rw
+      - appwrite-functions:/storage/functions:rw
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      influxdb:
+        condition: service_started
+
+  appwrite-realtime:
+    <<: *appwrite-service
+    entrypoint: realtime
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  appwrite-worker-audits:
+    <<: *appwrite-service
+    entrypoint: worker-audits
+    depends_on: &db-deps
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  appwrite-worker-webhooks:
+    <<: *appwrite-service
+    entrypoint: worker-webhooks
+    depends_on: *db-deps
+
+  appwrite-worker-deletes:
+    <<: *appwrite-service
+    entrypoint: worker-deletes
+    volumes:
+      - appwrite-uploads:/storage/uploads:rw
+      - appwrite-cache:/storage/cache:rw
+      - appwrite-functions:/storage/functions:rw
+      - appwrite-builds:/storage/builds:rw
+      - appwrite-certificates:/storage/certificates:rw
+    depends_on: *db-deps
+
+  appwrite-worker-databases:
+    <<: *appwrite-service
+    entrypoint: worker-databases
+    depends_on: *db-deps
+
+  appwrite-worker-certificates:
+    <<: *appwrite-service
+    entrypoint: worker-certificates
+    volumes:
+      - appwrite-config:/storage/config:rw
+      - appwrite-certificates:/storage/certificates:rw
+    depends_on: *db-deps
+
+  appwrite-worker-mails:
+    <<: *appwrite-service
+    entrypoint: worker-mails
+    depends_on: *db-deps
+
+  appwrite-worker-messaging:
+    <<: *appwrite-service
+    entrypoint: worker-messaging
+    depends_on: *db-deps
+
+  appwrite-worker-migrations:
+    <<: *appwrite-service
+    entrypoint: worker-migrations
+    depends_on: *db-deps
+
+  appwrite-maintenance:
+    <<: *appwrite-service
+    entrypoint: maintenance
+    depends_on: *db-deps
+
+  appwrite-usage:
+    <<: *appwrite-service
+    entrypoint: usage
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      influxdb:
+        condition: service_started
+
+  appwrite-schedule:
+    <<: *appwrite-service
+    entrypoint: schedule
+    depends_on: *db-deps
+
+  # ------------------------------------------------------------ data stores
+  mariadb:
+    image: mariadb:10.7 # pinned to match Appwrite 1.4.x
+    <<: *x-logging
+    restart: unless-stopped
+    command: mysqld --innodb-flush-method=fsync
+    environment:
+      MYSQL_ROOT_PASSWORD: ${APPWRITE_DB_ROOT_PASS:?Set APPWRITE_DB_ROOT_PASS}
+      MYSQL_DATABASE: appwrite
+      MYSQL_USER: appwrite
+      MYSQL_PASSWORD: ${APPWRITE_DB_PASS}
+    volumes:
+      - appwrite-mariadb:/var/lib/mysql:rw
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    networks: [appwrite]
+
+  redis:
+    image: redis:7.0.4-alpine
+    <<: *x-logging
+    restart: unless-stopped
+    command: >
+      redis-server
+      --maxmemory            512mb
+      --maxmemory-policy     allkeys-lru
+      --maxmemory-samples    5
+    volumes:
+      - appwrite-redis:/data:rw
+    networks: [appwrite]
+
+  influxdb:
+    image: appwrite/influxdb:1.5.0
+    <<: *x-logging
+    restart: unless-stopped
+    volumes:
+      - appwrite-influxdb:/var/lib/influxdb:rw
+    networks: [appwrite]
+
+  telegraf:
+    image: appwrite/telegraf:1.4.0
+    <<: *x-logging
+    restart: unless-stopped
+    environment:
+      _APP_INFLUXDB_HOST: influxdb
+      _APP_INFLUXDB_PORT: "8086"
+    networks: [appwrite]
+
+networks:
+  appwrite:
+
+volumes:
+  appwrite-mariadb:
+  appwrite-redis:
+  appwrite-cache:
+  appwrite-uploads:
+  appwrite-certificates:
+  appwrite-functions:
+  appwrite-builds:
+  appwrite-influxdb:
+  appwrite-config:
