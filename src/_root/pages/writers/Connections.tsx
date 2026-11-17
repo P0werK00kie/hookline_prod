@@ -52,12 +52,9 @@ const Connections = () => {
   return (
     <div className="common-container">
       <div className="max-w-3xl w-full flex flex-col gap-10">
-        <Link to="/writers-block" className="small-medium text-light-3 hover:text-light-1">
-          ← Writers Block
-        </Link>
-        <PageHero eyebrow="Writers Block" title="My connections">
-          Requests from other writers, requests you've sent, and the writers you're
-          connected with.
+        <PageHero eyebrow="Connections" title="My connections">
+          Requests from writers and listeners, requests you've sent, and the people
+          you're connected with. Contact details are shared once a request is accepted.
         </PageHero>
 
         <Section title={`Requests for you (${incoming.length})`}>
@@ -66,7 +63,7 @@ const Connections = () => {
           ) : (
             <ul className="flex flex-col gap-4">
               {incoming.map((c) => (
-                <Row key={c.$id} name={c.fromName} userId={c.fromUserId} note={c.note} date={c.$createdAt}>
+                <Row key={c.$id} songTitle={c.songTitle} name={c.fromName} userId={c.fromUserId} note={c.note} date={c.$createdAt}>
                   <Button size="sm" className="shad-button_primary px-5" disabled={busy} onClick={() => onRespond(c, true)}>
                     Accept
                   </Button>
@@ -81,7 +78,7 @@ const Connections = () => {
 
         <Section title={`Connected (${connected.length})`}>
           {!connected.length ? (
-            <ComingSoon>When a writer accepts your request (or you accept theirs), they'll show up here.</ComingSoon>
+            <ComingSoon>When someone accepts your request (or you accept theirs), they'll show up here.</ComingSoon>
           ) : (
             <ul className="flex flex-col gap-4">
               {connected.map((c) => {
@@ -90,6 +87,7 @@ const Connections = () => {
                 return (
                   <Row
                     key={c.$id}
+                    songTitle={c.songTitle}
                     name={iSent ? c.toName : c.fromName}
                     userId={iSent ? c.toUserId : c.fromUserId}
                     note={c.note}
@@ -112,7 +110,7 @@ const Connections = () => {
           ) : (
             <ul className="flex flex-col gap-4">
               {outgoing.map((c) => (
-                <Row key={c.$id} name={c.toName} userId={c.toUserId} note={c.note} date={c.$createdAt}>
+                <Row key={c.$id} songTitle={c.songTitle} name={c.toName} userId={c.toUserId} note={c.note} date={c.$createdAt}>
                   <Button size="sm" variant="ghost" className="shad-button_ghost" disabled={busy} onClick={() => onWithdraw(c)}>
                     Withdraw
                   </Button>
@@ -127,6 +125,7 @@ const Connections = () => {
 };
 
 type RowProps = {
+  songTitle?: string;
   name: string;
   userId: string;
   note: string;
@@ -134,7 +133,7 @@ type RowProps = {
   children: React.ReactNode;
 };
 
-const Row = ({ name, userId, note, date, children }: RowProps) => (
+const Row = ({ songTitle, name, userId, note, date, children }: RowProps) => (
   <li className="rounded-2xl border border-dark-4 bg-dark-2 p-5 flex flex-col gap-3">
     <div className="flex items-center gap-4">
       <WriterAvatar name={name} size={44} />
@@ -145,6 +144,9 @@ const Row = ({ name, userId, note, date, children }: RowProps) => (
         <p className="subtle-semibold text-light-3">{new Date(date).toLocaleDateString()}</p>
       </div>
     </div>
+    {songTitle && (
+      <p className="subtle-semibold text-primary-500">♪ About “{songTitle}”</p>
+    )}
     {note && <p className="small-regular text-light-2 italic">“{note}”</p>}
     <div className="flex flex-wrap items-center gap-3">{children}</div>
   </li>

@@ -132,6 +132,9 @@ services:
       APPWRITE_ENDPOINT: http://appwrite/v1
       APPWRITE_PROJECT_ID: ${APPWRITE_PROJECT_ID}
       APPWRITE_DATABASE_ID: ${APPWRITE_DATABASE_ID}
+      APPWRITE_USER_COLLECTION_ID: ${APPWRITE_USER_COLLECTION_ID}
+      # Largest song upload in bytes; must not exceed Appwrite's own limit below.
+      APPWRITE_STORAGE_LIMIT: ${APPWRITE_STORAGE_LIMIT:-30000000}
       # Server API key from the Appwrite console (see PORTAINER.md). Until it's
       # set the API reports "not ready" and the For Writers pages are disabled.
       APPWRITE_API_KEY: ${HOOKLINE_API_KEY:-}

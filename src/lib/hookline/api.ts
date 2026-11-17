@@ -1,6 +1,6 @@
 // Client for hookline-api (served at /api by the web container).
 import { account } from "@/lib/appwrite/config";
-import { IConnection, IRole } from "@/types";
+import { IConnection, IRole, ISubmission, ISubmissionStatus } from "@/types";
 
 let cached: { jwt: string; expires: number } | null = null;
 
@@ -64,4 +64,14 @@ export const hooklineApi = {
     call<IConnection>("POST", "/connections", { toAccountId, note }),
   respond: (connectionId: string, accept: boolean) =>
     call<IConnection>("POST", `/connections/${connectionId}/respond`, { accept }),
+  /** "Connect with Writer" from a song (any signed-in member). */
+  connectAboutSong: (songId: string, note: string) =>
+    call<IConnection>("POST", "/connections", { songId, note }),
+  /** Returns a short-lived URL the <audio> element can stream. Counts a play. */
+  listen: (songId: string) =>
+    call<{ url: string; expiresAt: string }>("POST", `/songs/${songId}/listen`),
+  submit: (requestId: string, songId: string, note: string) =>
+    call<ISubmission>("POST", `/requests/${requestId}/submissions`, { songId, note }),
+  reviewSubmission: (submissionId: string, status: ISubmissionStatus) =>
+    call<ISubmission>("PATCH", `/submissions/${submissionId}`, { status }),
 };

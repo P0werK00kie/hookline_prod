@@ -1,7 +1,31 @@
 import { INavLink } from "@/types";
 
+/** "Find Music" links: every signed-in member. */
+export const musicLinks: INavLink[] = [
+  {
+    imgURL: "/assets/icons/music.svg",
+    route: "/perfect-pitch",
+    label: "Perfect Pitch",
+  },
+  {
+    imgURL: "/assets/icons/hook.svg",
+    route: "/hook-me",
+    label: "Hook Me",
+  },
+  {
+    imgURL: "/assets/icons/chat.svg",
+    route: "/connections",
+    label: "Connections",
+  },
+];
+
 /** "For Writers" links, shown in the sidebar under their own heading. */
 export const writerLinks: INavLink[] = [
+  {
+    imgURL: "/assets/icons/upload.svg",
+    route: "/my-songs",
+    label: "My Songs",
+  },
   {
     imgURL: "/assets/icons/writers-block.svg",
     route: "/writers-block",
@@ -55,6 +79,11 @@ export const bottombarLinks = [
     imgURL: "/assets/icons/home.svg",
     route: "/",
     label: "Home",
+  },
+  {
+    imgURL: "/assets/icons/music.svg",
+    route: "/perfect-pitch",
+    label: "Music",
   },
   {
     imgURL: "/assets/icons/writers-block.svg",

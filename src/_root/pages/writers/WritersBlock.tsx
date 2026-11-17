@@ -88,7 +88,7 @@ const WritersBlock = () => {
                   {mine ? "Edit my listing" : "List My Name"}
                 </Button>
               </Link>
-              <Link to="/writers-block/connections">
+              <Link to="/connections">
                 <Button className="shad-button_dark_4 px-6">
                   My connections
                   {pendingIncoming > 0 && (
@@ -249,7 +249,7 @@ const WriterCard = ({ writer, isMe, relation, onConnect }: WriterCardProps) => (
       ) : relation.kind === "sent" ? (
         <p className="small-medium text-light-3">Request sent</p>
       ) : (
-        <Link to="/writers-block/connections">
+        <Link to="/connections">
           <Button size="sm" className="shad-button_dark_4 px-5">
             {relation.kind === "received" ? "Respond to request" : "Connected · view"}
           </Button>

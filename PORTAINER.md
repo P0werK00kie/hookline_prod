@@ -131,6 +131,19 @@ Sign-up writes the user's profile document before the user is signed in, so the
 `users` collection must give **Create** to **Any**. Projects migrated from Cloud already
 do, because that's how sign-up works there.
 
+## Find Music (Perfect Pitch and Hook Me)
+
+- Writers upload songs from **My Songs**. Audio goes into a private `songs` storage
+  bucket that `hookline-api` creates. Listeners never get a direct file link: playing a
+  song asks the API for a stream link that expires after an hour. That's also where a
+  per-song payment check can go later.
+- Uploads are limited by `APPWRITE_STORAGE_LIMIT` (30 MB by default, about 3 minutes of
+  WAV). Raise it in the stack if writers upload long uncompressed files.
+- Hook Me postings can be created by any signed-in member. Only the poster and the writer
+  can see a submission, so submissions and their status changes go through the API.
+- "Connect with Writer" sends a connection request. When it's accepted, both sides see
+  each other's Writers Block contact details, or their account email if they have none.
+
 ## Operations
 
 **Changing host, ports or IDs.** The front end reads its Appwrite settings when the

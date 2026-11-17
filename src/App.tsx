@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 
 import "./globals.css";
@@ -34,6 +34,15 @@ const GuideChapter = lazy(() => import("./_root/pages/writers/GuideChapter"));
 const GuideChapterEditor = lazy(() => import("./_root/pages/writers/GuideChapterEditor"));
 const AdminUsers = lazy(() => import("./_root/pages/admin/AdminUsers"));
 
+// Find Music
+const PerfectPitch = lazy(() => import("./_root/pages/music/PerfectPitch"));
+const GenreSongs = lazy(() => import("./_root/pages/music/GenreSongs"));
+const SongDetail = lazy(() => import("./_root/pages/music/SongDetail"));
+const MySongs = lazy(() => import("./_root/pages/music/MySongs"));
+const SongEditor = lazy(() => import("./_root/pages/music/SongEditor"));
+const HookMe = lazy(() => import("./_root/pages/music/HookMe"));
+const MyHookMe = lazy(() => import("./_root/pages/music/MyHookMe"));
+
 const App = () => {
   return (
     <main className="flex h-screen">
@@ -63,11 +72,22 @@ const App = () => {
             <Route path="/profile/:id/*" element={<Profile />} />
             <Route path="/update-profile/:id" element={<UpdateProfile />} />
 
+            {/* Find Music: every signed-in member */}
+            <Route path="/perfect-pitch" element={<PerfectPitch />} />
+            <Route path="/perfect-pitch/:genre" element={<GenreSongs />} />
+            <Route path="/songs/:id" element={<SongDetail />} />
+            <Route path="/hook-me" element={<HookMe />} />
+            <Route path="/hook-me/mine" element={<MyHookMe />} />
+            <Route path="/connections" element={<Connections />} />
+            <Route path="/writers-block/connections" element={<Navigate to="/connections" replace />} />
+
             {/* Writers and Admins */}
             <Route element={<RequireRole roles={["writer"]} />}>
               <Route path="/writers-block" element={<WritersBlock />} />
               <Route path="/writers-block/listing" element={<MyListing />} />
-              <Route path="/writers-block/connections" element={<Connections />} />
+              <Route path="/my-songs" element={<MySongs />} />
+              <Route path="/my-songs/new" element={<SongEditor />} />
+              <Route path="/my-songs/:id/edit" element={<SongEditor />} />
               <Route path="/guild-me-through-it" element={<GuildMeThroughIt />} />
               <Route path="/guild-me-through-it/:id" element={<GuideChapter />} />
             </Route>

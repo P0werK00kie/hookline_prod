@@ -87,6 +87,68 @@ export interface IConnection extends Models.Document {
   fromContact: string;
   toContact: string;
   respondedAt: string | null;
+  /** Set when the request came from "Connect with Writer" on a song. */
+  songId: string;
+  songTitle: string;
+}
+
+// ============================================================ FIND MUSIC
+export type IGenre =
+  | "christian" | "country" | "rock" | "pop" | "alternative" | "blues" | "folk"
+  | "hip-hop" | "classical" | "rnb" | "reggae" | "jazz" | "show-tunes";
+export type IMood = "upbeat" | "heartfelt" | "moody" | "anthemic" | "chill";
+export type ITempo = "slow" | "mid" | "fast";
+export type IProjectType =
+  | "record" | "jingle" | "commercial" | "film" | "tv" | "musical" | "album" | "church" | "other";
+
+export interface ISong extends Models.Document {
+  ownerAccountId: string;
+  ownerUserId: string;
+  writerName: string;
+  title: string;
+  genre: IGenre;
+  mood: IMood | null;
+  tempo: ITempo | null;
+  durationSec: number;
+  description: string;
+  lyrics: string;
+  coWriters: string;
+  audioFileId: string;
+  published: boolean;
+  plays: number;
+}
+
+export interface ISongRequest extends Models.Document {
+  posterAccountId: string;
+  posterUserId: string;
+  posterName: string;
+  title: string;
+  projectType: IProjectType;
+  genre: IGenre | null;
+  style: string;
+  mood: string;
+  details: string;
+  tempoKeyRange: string;
+  deadline: string | null;
+  status: "open" | "closed";
+  submissionCount: number;
+}
+
+export type ISubmissionStatus = "submitted" | "shortlisted" | "passed";
+
+export interface ISubmission extends Models.Document {
+  requestId: string;
+  requestTitle: string;
+  posterAccountId: string;
+  songId: string;
+  songTitle: string;
+  songGenre: IGenre;
+  songDurationSec: number;
+  writerAccountId: string;
+  writerUserId: string;
+  writerName: string;
+  note: string;
+  status: ISubmissionStatus;
 }
 
 export interface IGuideChapter extends Models.Document {

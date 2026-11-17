@@ -11,7 +11,24 @@ export const COLLECTIONS = {
   connections: "connections",
   guideChapters: "guide_chapters",
   guideItems: "guide_items",
+  songs: "songs",
+  songRequests: "song_requests",
+  submissions: "submissions",
 };
+
+export const BUCKETS = { songs: "songs" };
+
+// Perfect Pitch categories (slug -> label lives in the front end).
+export const GENRES = [
+  "christian", "country", "rock", "pop", "alternative", "blues", "folk",
+  "hip-hop", "classical", "rnb", "reggae", "jazz", "show-tunes",
+];
+export const MOODS = ["upbeat", "heartfelt", "moody", "anthemic", "chill"];
+export const TEMPOS = ["slow", "mid", "fast"];
+export const PROJECT_TYPES = [
+  "record", "jingle", "commercial", "film", "tv", "musical", "album", "church", "other",
+];
+export const AUDIO_EXTENSIONS = ["mp3", "m4a", "aac", "wav", "ogg", "flac"];
 
 export const ROLES = ["admin", "writer", "singer"];
 export const GUIDE_SECTIONS = [
@@ -33,6 +50,8 @@ const int = (key, required = false, min, max, def) => ({ t: "integer", key, requ
 const bool = (key, required = false, def) => ({ t: "boolean", key, required, def });
 const date = (key, required = false) => ({ t: "datetime", key, required });
 const enm = (key, elements, required = false, def) => ({ t: "enum", key, elements, required, def });
+
+const users = R.users();
 
 const SPEC = [
   {
@@ -88,6 +107,8 @@ const SPEC = [
       str("fromContact", 500),
       str("toContact", 500),
       date("respondedAt"),
+      str("songId", 36),
+      str("songTitle", 128),
     ],
     indexes: [
       { key: "by_from", type: "key", attributes: ["fromAccountId"] },
@@ -131,7 +152,109 @@ const SPEC = [
     ],
     indexes: [{ key: "by_section", type: "key", attributes: ["section", "position"] }],
   },
+  {
+    id: COLLECTIONS.songs,
+    name: "Songs",
+    // Writers create; each song's own permissions decide who can read it:
+    // read("users") when published, owner-only while private.
+    documentSecurity: true,
+    permissions: [
+      P.create(writer), P.create(admin),
+      P.read(admin), P.update(admin), P.delete(admin),
+    ],
+    attributes: [
+      str("ownerAccountId", 36, true),
+      str("ownerUserId", 36, true),
+      str("writerName", 128, true),
+      str("title", 128, true),
+      enm("genre", GENRES, true),
+      enm("mood", MOODS),
+      enm("tempo", TEMPOS),
+      int("durationSec", false, 0, 7200, 0),
+      str("description", 1000),
+      str("lyrics", 5000),
+      str("coWriters", 256),
+      str("audioFileId", 36, true),
+      bool("published", false, true),
+      int("plays", false, 0, 2000000000, 0),
+    ],
+    indexes: [
+      { key: "by_genre", type: "key", attributes: ["genre"] },
+      { key: "by_owner", type: "key", attributes: ["ownerAccountId"] },
+    ],
+  },
+  {
+    id: COLLECTIONS.songRequests,
+    name: "Hook Me requests",
+    documentSecurity: true, // poster edits their own; everyone signed in reads
+    permissions: [
+      P.read(users), P.create(users),
+      P.update(admin), P.delete(admin),
+    ],
+    attributes: [
+      str("posterAccountId", 36, true),
+      str("posterUserId", 36),
+      str("posterName", 128, true),
+      str("title", 128, true),
+      enm("projectType", PROJECT_TYPES, true),
+      enm("genre", GENRES),
+      str("style", 128),
+      str("mood", 128),
+      str("details", 2000),
+      str("tempoKeyRange", 200),
+      date("deadline"),
+      enm("status", ["open", "closed"], false, "open"),
+      int("submissionCount", false, 0, 1000000, 0),
+    ],
+    indexes: [{ key: "by_poster", type: "key", attributes: ["posterAccountId"] }],
+  },
+  {
+    id: COLLECTIONS.submissions,
+    name: "Hook Me submissions",
+    documentSecurity: true, // readable by the poster and the writer; written by the API
+    permissions: [P.read(admin), P.delete(admin)],
+    attributes: [
+      str("requestId", 36, true),
+      str("requestTitle", 128),
+      str("posterAccountId", 36, true),
+      str("songId", 36, true),
+      str("songTitle", 128),
+      enm("songGenre", GENRES),
+      int("songDurationSec", false, 0, 7200, 0),
+      str("writerAccountId", 36, true),
+      str("writerUserId", 36),
+      str("writerName", 128),
+      str("note", 500),
+      enm("status", ["submitted", "shortlisted", "passed"], false, "submitted"),
+    ],
+    indexes: [
+      { key: "by_request", type: "key", attributes: ["requestId"] },
+      { key: "by_writer", type: "key", attributes: ["writerAccountId"] },
+      { key: "by_poster", type: "key", attributes: ["posterAccountId"] },
+    ],
+  },
 ];
+
+const BUCKET_SPEC = [
+  {
+    id: BUCKETS.songs,
+    name: "Song audio",
+    // Writers upload; files are owner-only and streamed to listeners by the API.
+    permissions: [P.create(writer), P.create(admin), P.read(admin), P.delete(admin)],
+    fileSecurity: true,
+    extensions: AUDIO_EXTENSIONS,
+  },
+];
+
+export async function ensureBuckets(storage, maxFileSize, log = console.log) {
+  for (const b of BUCKET_SPEC) {
+    // No compression/encryption so the API can serve byte ranges (seeking).
+    const args = [b.id, b.name, b.permissions, b.fileSecurity, true, maxFileSize, b.extensions, "none", false, false];
+    const created = await ignore409(() => storage.createBucket(...args));
+    if (created) log(`schema: created bucket ${b.id}`);
+    else await storage.updateBucket(...args);
+  }
+}
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

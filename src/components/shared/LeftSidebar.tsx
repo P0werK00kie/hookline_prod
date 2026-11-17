@@ -1,7 +1,7 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 
 import { INavLink } from "@/types";
-import { adminLinks, sidebarLinks, writerLinks } from "@/constants";
+import { adminLinks, musicLinks, sidebarLinks, writerLinks } from "@/constants";
 import { hasRole } from "@/lib/roles";
 import { Loader } from "@/components/shared";
 import { Button } from "@/components/ui/button";
@@ -61,10 +61,19 @@ const LeftSidebar = () => {
           ))}
         </ul>
 
-        <NavGroup title="For Writers">
-          {writerLinks.map((link) => (
+        <NavGroup title="Find Music">
+          {musicLinks.map((link) => (
             <SidebarLink key={link.label} link={link} active={pathname.startsWith(link.route)} />
           ))}
+        </NavGroup>
+
+        <NavGroup title="For Writers">
+          {writerLinks
+            // My Songs is only useful to writers; the other links show non-writers how to join.
+            .filter((link) => link.route !== "/my-songs" || hasRole(user, "writer"))
+            .map((link) => (
+              <SidebarLink key={link.label} link={link} active={pathname.startsWith(link.route)} />
+            ))}
         </NavGroup>
 
         {hasRole(user, "admin") && (
